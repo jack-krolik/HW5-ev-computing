@@ -3,71 +3,38 @@ import random as rnd
 import numpy as np
 from objectives import overallocation, undersupport, unwilling
 
-def agent_overallocation(solution, max_assigned):
-    idx = 0
-    for ta_row, max_a in zip(solution, max_assigned):
+def agent_overallocation(solution, max_assigned_lst):
 
-        if sum(ta_row) > max_a:
+    maxed_tas = [idx for idx, (ta_row, max_assigned) in
+                               enumerate(zip(solution.tolist(), max_assigned_lst)) if sum(ta_row) > max_assigned]
 
-            random_int = rnd.randint(0, len(ta_row) - 1)
+    random_sec = [rnd.randint(0, solution.shape[1] - 1) for _ in maxed_tas]
 
-            while ta_row[random_int] != 1:
-                random_int = rnd.randint(0, len(ta_row) - 1)
-
-            ta_row[random_int] = 0
-            solution[idx, :] = ta_row
-
-        idx += 1
+    solution[maxed_tas, random_sec] = 0
 
     return solution
 
-    # while True:
-    #     rnd_row_val = rnd.randint(0, solution.shape[0] - 1)
-    #     rnd_col_val = rnd.randint(0, solution.shape[1] - 1)
-    #
-    #     if solution[rnd_row_val, rnd_col_val] == 1:
-    #         solution[rnd_row_val, rnd_col_val] = 0
-    #         break
-    #
-    # return solution
+
 
 def agent_conflicts(solution):
     pass
 
 def agent_undersupport(solution, min_sup):
-    solution_temp = solution.T
-    idx = 0
-    for section_row, min_s in zip(solution_temp, min_sup):
 
-        if sum(section_row) < min_s:
+    sections_undersupported = [idx for idx, (sec_row, sup) in enumerate(zip(solution.T.tolist(), min_sup))
+                               if sum(sec_row) < sup]
+    random_tas = [rnd.randint(0, solution.shape[0] - 1) for _ in sections_undersupported]
 
-            random_int = rnd.randint(0, len(section_row) - 1)
+    solution[random_tas, sections_undersupported] = 1
 
-            while section_row[random_int] != 0:
-                random_int = rnd.randint(0, len(section_row) - 1)
 
-            section_row[random_int] = 1
-            solution_temp[idx, :] = section_row
+    return solution
 
-        idx += 1
-
-    return solution_temp.T
 
 def agent_unwilling(solution, prefs):
+    pass
 
-    # new_sol = np.where((solution == 1) & (prefs == 'W'), 0, 1)
-    idx1 = 0
-    for ta_row, pref_row in zip(solution, prefs):
-        idx2 = 0
-        for assignment, pref in zip(ta_row, pref_row):
-            if assignment == 1 and pref == 'W':
-                ta_row[idx2] = 0
 
-                idx2 += 1
-
-        solution[idx1, :] = ta_row
-
-        idx1 += 1
 
 
 
@@ -90,5 +57,12 @@ test1, test2, test3 = pd.read_csv('test1.csv', header=None).to_numpy(), \
 # print(overallocation(agent_overallocation(test1, max_assign), max_assign))
 # print(undersupport(test1, min_support))
 # print(undersupport(agent_undersupport(test1, min_support), min_support))
-print(unwilling(test1, preferences))
-print(unwilling(agent_unwilling(test1, preferences), preferences))
+# print(unwilling(test1, preferences))
+# print(unwilling(agent_unwilling(test1, preferences), preferences))
+
+print(overallocation(test1, max_assign))
+print(overallocation(agent_overallocation(test1, max_assign), max_assign))
+
+# for i in range(1, 1000):
+#     sol = agent_undersupport(sol, min_support)
+# print(undersupport(sol, min_support))
