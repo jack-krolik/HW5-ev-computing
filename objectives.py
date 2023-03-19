@@ -70,4 +70,4 @@ for idx, test in enumerate([test1, test2, test3]):
                                  undersupport(test, min_support), unwilling(test, preferences),
                                  unpreferred(test, preferences)]
 
-print(obj_df)
+
