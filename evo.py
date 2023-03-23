@@ -1,4 +1,3 @@
-
 import random as rnd
 import copy
 from functools import reduce
@@ -61,6 +60,7 @@ class Evo:
 
         agent_names = list(self.agents.keys())
         for i in range(n):
+
             pick = rnd.choice(agent_names) # pick an agent to run
             self.run_agent(pick)
             if  i % dom == 0:

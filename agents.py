@@ -2,11 +2,17 @@ import pandas as pd
 import random as rnd
 import numpy as np
 from objectives import overallocation, undersupport, unwilling
+from variables import TaVariables
 
-def agent_overallocation(solution, max_assigned_lst):
+def agent_overallocation(solutions, **kwargs):
+    solution = solutions[0]
 
-    maxed_tas = [idx for idx, (ta_row, max_assigned) in
-                               enumerate(zip(solution.tolist(), max_assigned_lst)) if sum(ta_row) > max_assigned]
+    solution = np.array(solution).reshape(43, -1)
+
+    max_assigned = TaVariables.max_assigned
+
+    maxed_tas = [idx for idx, (ta_row, max_assignment) in
+                               enumerate(zip(solution.tolist(), max_assigned)) if sum(ta_row) > max_assignment]
 
     random_sec = [rnd.randint(0, solution.shape[1] - 1) for _ in maxed_tas]
 
@@ -16,12 +22,15 @@ def agent_overallocation(solution, max_assigned_lst):
 
 
 
-def agent_conflicts(solution):
+def agent_conflicts(solutions):
     pass
 
-def agent_undersupport(solution, min_sup):
+def agent_undersupport(solutions, **kwargs):
+    solution = solutions[0]
+    solution = np.array(solution).reshape(43, -1)
 
-    sections_undersupported = [idx for idx, (sec_row, sup) in enumerate(zip(solution.T.tolist(), min_sup))
+    minimum_support = TaVariables.minimum_support
+    sections_undersupported = [idx for idx, (sec_row, sup) in enumerate(zip(solution.T.tolist(), minimum_support))
                                if sum(sec_row) < sup]
     random_tas = [rnd.randint(0, solution.shape[0] - 1) for _ in sections_undersupported]
 
@@ -31,38 +40,25 @@ def agent_undersupport(solution, min_sup):
     return solution
 
 
-def agent_unwilling(solution, prefs):
-    pass
+def agent_unwilling(solutions, **kwargs):
+    solution = solutions[0]
+    solution = np.array(solution).reshape(43, -1)
+
+    prefs = TaVariables.prefs
+    conflict_index = [
+        [idx for idx, (pref, assignment) in enumerate(zip(pref_row, ta_row)) if (pref == 'U') and (assignment == 1)]
+        for pref_row, ta_row in zip(prefs, solution)]
+
+    ta_index = [i for i, lst in enumerate(conflict_index) if len(lst) > 0]
+
+    random_sec = [np.random.choice(conflict_index[i]) for i in ta_index]
+
+    solution[ta_index, random_sec] = 0
+
+    return solution
 
 
 
 
 
 
-
-ta = pd.read_csv('tas.csv')
-
-sections = pd.read_csv('sections.csv')
-
-max_assign = ta['max_assigned'].values
-
-min_support = sections['min_ta'].values
-
-preferences = ta.loc[:, '0':].values
-
-test1, test2, test3 = pd.read_csv('test1.csv', header=None).to_numpy(), \
-    pd.read_csv('test2.csv', header=None).to_numpy(), pd.read_csv('test3.csv', header=None).to_numpy()
-
-# print(overallocation(test1, max_assign))
-# print(overallocation(agent_overallocation(test1, max_assign), max_assign))
-# print(undersupport(test1, min_support))
-# print(undersupport(agent_undersupport(test1, min_support), min_support))
-# print(unwilling(test1, preferences))
-# print(unwilling(agent_unwilling(test1, preferences), preferences))
-
-print(overallocation(test1, max_assign))
-print(overallocation(agent_overallocation(test1, max_assign), max_assign))
-
-# for i in range(1, 1000):
-#     sol = agent_undersupport(sol, min_support)
-# print(undersupport(sol, min_support))

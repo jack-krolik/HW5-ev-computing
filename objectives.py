@@ -1,18 +1,21 @@
 import pandas as pd
 import csv
 import numpy as np
+from variables import TaVariables
 
-
-def overallocation(test, max_assigned):
-
-    overallocated_lst = [sum(lst) - max for lst, max in zip(test.tolist(), max_assigned) if sum(lst) > max]
+def overallocation(solution, **kwargs):
+    max_assigned = TaVariables.max_assigned
+    print(type(max_assigned))
+    overallocated_lst = [sum(lst) - max_assignment for lst, max_assignment in zip(solution.tolist(), max_assigned)
+                         if sum(lst) > max_assignment]
 
     return sum(overallocated_lst)
 
 
-def conflicts(test, times):
+def conflicts(solution, **kwargs):
 
-    conflict_combs = np.where(test == 1, times, 0).tolist()
+    times = TaVariables.times
+    conflict_combs = np.where(solution == 1, times, 0).tolist()
 
     conflict_list = [[_ for _ in lst if _ != 0] for lst in conflict_combs]
     conflict_set = [set([_ for _ in lst if _ != 0]) for lst in conflict_list]
@@ -22,52 +25,31 @@ def conflicts(test, times):
     return sum(num_conflicts)
 
 
-def undersupport(test, minimum_support):
+def undersupport(solution, **kwargs):
 
-    undersupport_lst = [min - sum(lst) for lst, min in zip(test.T.tolist(), minimum_support) if sum(lst) < min]
+    minimum_support = TaVariables.minimum_support
+    undersupport_lst = [min - sum(lst) for lst, min in zip(solution.T.tolist(), minimum_support) if sum(lst) < min]
 
     return sum(undersupport_lst)
 
 
-def unwilling(test, prefs):
+def unwilling(solution, **kwargs):
 
-    unwilling_lst = np.where((test == 1) & (prefs == 'U'), 1, 0).tolist()
+    prefs = TaVariables.prefs
+    unwilling_lst = np.where((solution == 1) & (prefs == 'U'), 1, 0).tolist()
 
     unwilling_count = [sum(lst) for lst in unwilling_lst]
 
     return sum(unwilling_count)
 
 
-def unpreferred(test, prefs):
+def unpreferred(solution, **kwargs):
 
-    willing_lst = np.where((test == 1) & (prefs == 'W'), 1, 0).tolist()
+    prefs = TaVariables.prefs
+    willing_lst = np.where((solution == 1) & (prefs == 'W'), 1, 0).tolist()
 
     willing_count = [sum(lst) for lst in willing_lst]
 
     return sum(willing_count)
-
-
-test1, test2, test3 = pd.read_csv('test1.csv', header=None).to_numpy(), \
-    pd.read_csv('test2.csv', header=None).to_numpy(), pd.read_csv('test3.csv', header=None).to_numpy()
-
-ta = pd.read_csv('tas.csv')
-
-sections = pd.read_csv('sections.csv')
-
-max_assign = ta['max_assigned'].values
-
-conflict_times = sections['daytime'].to_numpy()
-
-min_support = sections['min_ta'].values
-
-preferences = ta.loc[:, '0':].values
-
-obj_df = pd.DataFrame([['Overallocation'], ['Conflicts'], ['Undersupport'], ['Unwilling'], ['Unpreferred']],
-                      columns=['Objectives'])
-
-for idx, test in enumerate([test1, test2, test3]):
-    obj_df['Test' + str(idx + 1)] = [overallocation(test, max_assign), conflicts(test, conflict_times),
-                                 undersupport(test, min_support), unwilling(test, preferences),
-                                 unpreferred(test, preferences)]
 
 
