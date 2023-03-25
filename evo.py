@@ -36,14 +36,10 @@ class Evo:
             popvals = tuple(self.pop.values())
             return [copy.deepcopy(rnd.choice(popvals)) for _ in range(k)]
 
-
     def add_solution(self, sol):
         """Add a new solution to the population """
         eval = tuple([(name, f(sol)) for name, f in self.fitness.items()])
         self.pop[eval] = sol
-
-
-
 
     def run_agent(self, name):
         """ Invoke an agent against the current population """
@@ -51,7 +47,6 @@ class Evo:
         picks = self.get_random_solutions(k)
         new_solution = op(picks)
         self.add_solution(new_solution)
-
 
     def evolve(self, n=1, dom=100, status=100):
         """ To run n random agents against the population
@@ -91,7 +86,6 @@ class Evo:
     def remove_dominated(self):
         nds = reduce(Evo._reduce_nds, self.pop.keys(), self.pop.keys())
         self.pop = {k:self.pop[k] for k in nds}
-
 
     def __str__(self):
         """ Output the solutions in the population """
