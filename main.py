@@ -4,6 +4,20 @@ from objectives import *
 
 
 def main():
+    # import test files and initialize tracking dataframe
+    test1 = pd.read_csv('test1.csv', header=None).to_numpy()
+    test2 = pd.read_csv('test2.csv', header=None).to_numpy()
+    test3 = pd.read_csv('test3.csv', header=None).to_numpy()
+    obj_df = pd.DataFrame([['Overallocation'], ['Conflicts'], ['Undersupport'], ['Unwilling'], ['Unpreferred']],
+                          columns=['Objectives'])
+
+    # run all objectives on each of the three tests and track the results
+    for idx, test in enumerate([test1, test2, test3]):
+        obj_df['Test' + str(idx + 1)] = [overallocation(test), conflicts(test),
+                                         undersupport(test), unwilling(test),
+                                         unpreferred(test)]
+    # output to csv
+    obj_df.to_csv('objective_tests.csv')
 
     # Create framework
     E = Evo()
@@ -19,12 +33,11 @@ def main():
     E.add_agent("agent_overallocation", agent_overallocation, k=1)
     E.add_agent("agent_undersupport", agent_undersupport, k=1)
     E.add_agent("agent_unwilling", agent_unwilling, k=1)
-
-
+    E.add_agent("agent_unpreferred", agent_unpreferred, k=1)
 
     # Seed the population with an initial random solution
     test1, test2, test3 = pd.read_csv('test1.csv', header=None).to_numpy(), \
-            pd.read_csv('test2.csv', header=None).to_numpy(), pd.read_csv('test3.csv', header=None).to_numpy()
+        pd.read_csv('test2.csv', header=None).to_numpy(), pd.read_csv('test3.csv', header=None).to_numpy()
     # N = 50
     # L = [rnd.randrange(1, 99) for _ in range(N)]
     E.add_solution(test1)
@@ -33,13 +46,14 @@ def main():
     # print(E)
 
     # Run the evolver
-    E.evolve(10, 10, 1)
+    E.evolve(10000, 100, 100)
 
     # Print final results
     print(E)
 
     # convert the results to a dataframe
-    obj_df = pd.DataFrame(columns=["Solution", "Overallocation", "Conflicts", "Undersupport", "Unwilling", "Unpreferred"])
+    obj_df = pd.DataFrame(
+        columns=["Solution", "Overallocation", "Conflicts", "Undersupport", "Unwilling", "Unpreferred"])
     solution_lst = []
     overallocate_list = []
     conflict_list = []
@@ -54,13 +68,15 @@ def main():
         unwilling_list.append(key[3][1])
         unpreferred_list.append(key[4][1])
 
+    # fill and output dataframe
     obj_df['Solution'] = solution_lst
     obj_df['Overallocation'] = overallocate_list
     obj_df['Conflicts'] = conflict_list
     obj_df['Undersupport'] = undersupport_list
     obj_df['Unwilling'] = unwilling_list
     obj_df['Unpreferred'] = unpreferred_list
+    obj_df.to_csv('summary_table.csv')
 
 
-main()
-
+if __name__ == '__main__':
+    main()
