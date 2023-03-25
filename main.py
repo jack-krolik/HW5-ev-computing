@@ -8,16 +8,16 @@ def main():
     test1 = pd.read_csv('test1.csv', header=None).to_numpy()
     test2 = pd.read_csv('test2.csv', header=None).to_numpy()
     test3 = pd.read_csv('test3.csv', header=None).to_numpy()
-    obj_df = pd.DataFrame([['Overallocation'], ['Conflicts'], ['Undersupport'], ['Unwilling'], ['Unpreferred']],
-                          columns=['Objectives'])
+    test_df = pd.DataFrame([['Overallocation'], ['Conflicts'], ['Undersupport'], ['Unwilling'], ['Unpreferred']],
+                           columns=['Objectives'])
 
     # run all objectives on each of the three tests and track the results
     for idx, test in enumerate([test1, test2, test3]):
-        obj_df['Test' + str(idx + 1)] = [overallocation(test), conflicts(test),
-                                         undersupport(test), unwilling(test),
-                                         unpreferred(test)]
+        test_df['Test' + str(idx + 1)] = [overallocation(test), conflicts(test),
+                                          undersupport(test), unwilling(test),
+                                          unpreferred(test)]
     # output to csv
-    obj_df.to_csv('objective_tests.csv')
+    test_df.to_csv('objective_tests.csv')
 
     # Create framework
     E = Evo()
@@ -53,7 +53,7 @@ def main():
 
     # convert the results to a dataframe
     obj_df = pd.DataFrame(
-        columns=["Solution", "Overallocation", "Conflicts", "Undersupport", "Unwilling", "Unpreferred"])
+        columns=["Groupname", "Solution", "Overallocation", "Conflicts", "Undersupport", "Unwilling", "Unpreferred"])
     solution_lst = []
     overallocate_list = []
     conflict_list = []
@@ -75,6 +75,8 @@ def main():
     obj_df['Undersupport'] = undersupport_list
     obj_df['Unwilling'] = unwilling_list
     obj_df['Unpreferred'] = unpreferred_list
+    len_df = len(obj_df)
+    obj_df['Groupname'] = ['bej'] * len_df
     obj_df.to_csv('summary_table.csv')
 
 
